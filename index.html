@@ -17,11 +17,21 @@
             font-size: 2em;
         }
 
+        ul {
+            font-size: small;
+            columns: 2;
+        }
+
+        p {
+            margin:5px;
+        }
+
     </style>
 </head>
 <body>
     <div>
         <h5>Tebak Huruf di bawah ini : </h5>
+        <p>Category : <span id="category"></span> </p>
         <span id="huruf"></span>
         <input id="jawaban" />
         <button id="btn-submit"> submit </button>
@@ -30,13 +40,17 @@
         </p>
         <p>
             <button id="save">Save</button>
+            <button id="hint">Hint</button>
         </p>
+        <ul id="list" style="display: none;">
+            <li></li>
+        </ul>
     </div>
     <script src="./jquery-3.5.1.min.js"></script>
     <script src="./lodash.min.js"></script>
     <script>
         const TARGET = 50
-        const CURRENT_LOAD = 'ka'
+        const CURRENT_LOAD = 'vocal'
         var current_target = 0
         const data = [
                 {
@@ -64,6 +78,7 @@
                     romaji : 'o',
                     category : 'vocal'
                 },
+                
                 // ka
                 {
                     hiragana : 'か',
@@ -97,6 +112,10 @@
                     this.import()
                 }
 
+                achieved(acv){
+                    this[acv] = true
+                }
+
                 export(){
                     return this
                 }
@@ -110,6 +129,14 @@
                 save(){
                     localStorage.setItem('me', JSON.stringify(this.export()))
                 }
+            }
+
+            function loadList(category){
+                const filter = data.filter(obj => obj.category == category)
+                $('#list').empty()
+                filter.forEach(obj =>{
+                    $('#list').append(`<li>${obj.hiragana} - ${obj.romaji}</li>`)
+                })
             }
 
             function loadRandom(category){
@@ -149,10 +176,10 @@
                 
                 const find = data.find(obj => obj.hiragana == current)
                 if (find.romaji == val){
-                    alert('benar')
 
                     if (current_target == TARGET){
                         alert('SELAMAT ANDA LULUS')
+                        me.achieved(CURRENT_LOAD)
                         return false
                     }
                     loadRandom(CURRENT_LOAD)
@@ -174,13 +201,22 @@
                 me.save()
             })
 
+            $("#hint").click(function () {
+                if ($('#list').is(':visible')){
+                    $('#list').hide()
+                } else {
+                    loadList(CURRENT_LOAD)
+                    $('#list').show()
+                }
+            })
+
             var me = new Me()
             $(document).ready(function(){
-                loadRandom(CURRENT_LOAD)
-                loadState()
+                $('#category').text(CURRENT_LOAD)
                 $('#target').text(TARGET)
                 $('#current_target').text(current_target)
-                
+                loadRandom(CURRENT_LOAD)
+                loadState()
             })  
     </script>
 </body>
