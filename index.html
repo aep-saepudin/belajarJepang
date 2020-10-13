@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        span#huruf {
+            font-size: 4em;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-size: 2em;
+        }
+
+    </style>
+</head>
+<body>
+    <div>
+        <h5>Tebak Huruf di bawah ini : </h5>
+        <span id="huruf"></span>
+        <input id="jawaban" />
+        <button id="btn-submit"> submit </button>
+        <p>
+            Target Benar : <span id="current_target">0</span> / <span id="target">0</span>
+        </p>
+        <p>
+            <button id="save">Save</button>
+        </p>
+    </div>
+    <script src="./jquery-3.5.1.min.js"></script>
+    <script src="./lodash.min.js"></script>
+    <script>
+        const TARGET = 50
+        const CURRENT_LOAD = 'ka'
+        var current_target = 0
+        const data = [
+                {
+                    hiragana : 'あ',
+                    romaji : 'a',
+                    category : 'vocal'
+                },
+                {
+                    hiragana : 'い',
+                    romaji : 'i',
+                    category : 'vocal'
+                },
+                {
+                    hiragana : 'う',
+                    romaji : 'u',
+                    category : 'vocal'
+                },
+                {
+                    hiragana : 'え',
+                    romaji : 'e',
+                    category : 'vocal'
+                },
+                {
+                    hiragana : 'お',
+                    romaji : 'o',
+                    category : 'vocal'
+                },
+                // ka
+                {
+                    hiragana : 'か',
+                    romaji : 'ka',
+                    category : 'ka'
+                },
+                {
+                    hiragana : 'き',
+                    romaji : 'ki',
+                    category : 'ka'
+                },
+                {
+                    hiragana : 'く',
+                    romaji : 'ku',
+                    category : 'ka'
+                },
+                {
+                    hiragana : 'け',
+                    romaji : 'ke',
+                    category : 'ka'
+                },
+                {
+                    hiragana : 'こ',
+                    romaji : 'ko',
+                    category : 'ka'
+                },
+            ];
+
+            class Me {
+                constructor(){
+                    this.import()
+                }
+
+                export(){
+                    return this
+                }
+                import(json){
+                    this.vocal = _.get(json, 'vocal', false)
+                    this.ka = _.get(json, 'ka', false)
+                    this.ta = _.get(json, 'ta', false)
+                    this.sa = _.get(json, 'sa', false)
+                    this.na = _.get(json, 'na', false)
+                }
+                save(){
+                    localStorage.setItem('me', JSON.stringify(this.export()))
+                }
+            }
+
+            function loadRandom(category){
+                var filter = data;
+                if (Boolean(category)){
+                    filter = data.filter(obj => obj.category == category)
+                }
+                const length = filter.length;
+                const random = Math.floor(Math.random() * length);
+
+                $('#huruf').text(filter[random].hiragana);
+                $('#jawaban').focus()
+            };
+
+            function addTarget(){
+                current_target +=1;
+                $('#current_target').text(current_target)
+            }
+
+            function resetTarget(){
+                current_target =0;
+                $('#current_target').text(0)
+            }
+
+            function loadState() {
+                const me_data = localStorage.getItem('me')
+                if (Boolean(me_data)){
+                    const json = JSON.parse(me_data)
+                    me.import(json)
+                }
+            }
+
+
+            $('#btn-submit').click(function () {
+                const current = $('#huruf').text();
+                const val = $('#jawaban').val()
+                
+                const find = data.find(obj => obj.hiragana == current)
+                if (find.romaji == val){
+                    alert('benar')
+
+                    if (current_target == TARGET){
+                        alert('SELAMAT ANDA LULUS')
+                        return false
+                    }
+                    loadRandom(CURRENT_LOAD)
+                    addTarget()
+                } else {
+                    alert('salah')
+                    resetTarget()
+                }
+                $('#jawaban').val('');
+            })
+
+            $("#jawaban").on('keyup', function (e) {
+                if (e.key === 'Enter' || e.keyCode === 13) {
+                    $('#btn-submit').click()
+                }
+            });
+
+            $("#save").click(function () {
+                me.save()
+            })
+
+            var me = new Me()
+            $(document).ready(function(){
+                loadRandom(CURRENT_LOAD)
+                loadState()
+                $('#target').text(TARGET)
+                $('#current_target').text(current_target)
+                
+            })  
+    </script>
+</body>
+</html>
