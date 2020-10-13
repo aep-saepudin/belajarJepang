@@ -1,0 +1,1 @@
+![Image of Yaktocat](./images/Selection_120.png)
